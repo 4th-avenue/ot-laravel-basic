@@ -55,9 +55,9 @@ Route::post('/articles', function (Request $request) {
 });
 
 Route::get('articles', function(Request $request) {
-    $perPage = $request->input('per_page', 2);
+    $perPage = $request->input('per_page', 3);
 
-    $articles = Article::select('body', 'created_at')
+    $articles = Article::select('body', 'user_id', 'created_at')
     ->latest()
     ->paginate($perPage);
     
