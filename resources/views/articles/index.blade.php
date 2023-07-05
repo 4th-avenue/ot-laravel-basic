@@ -12,7 +12,7 @@
         @foreach($articles as $article)
             <div class="background-white border rounded mt-3 mb-3 p-3">
                 <p>{{$article->body}}</p>
-                <p>{{$article->created_at}}</p>
+                <p>{{$article->created_at->diffForHumans()}}</p>
             </div>
         @endforeach
     </div>
