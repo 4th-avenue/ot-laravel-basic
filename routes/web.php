@@ -58,7 +58,6 @@ Route::get('articles', function(Request $request) {
     $perPage = $request->input('per_page', 3);
 
     $articles = Article::with('user')
-    ->select('body', 'user_id', 'created_at')
     ->latest()
     ->paginate($perPage);
     
@@ -68,4 +67,8 @@ Route::get('articles', function(Request $request) {
             'articles' => $articles
         ]
     );
+});
+
+Route::get('articles/{article}', function(Article $article) {
+    return view('articles.show', ['article' => $article]);
 });
