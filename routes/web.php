@@ -77,7 +77,7 @@ Route::get('articles/{article}/edit', function(Article $article) {
     return view('articles.edit', ['article' => $article]);
 })->name('articles.edit');
 
-Route::put('articles/{article}/update', function(Request $request, Article $article) {
+Route::patch('articles/{article}', function(Request $request, Article $article) {
     // 비어있지 않고, 문자열이어야 하고, 255자를 넘으면 안 된다.
     $input = $request->validate([
         'body' => [
@@ -92,3 +92,9 @@ Route::put('articles/{article}/update', function(Request $request, Article $arti
 
     return redirect()->route('articles.index');
 })->name('articles.update');
+
+Route::delete('articles/{article}', function(Article $article) {
+    $article->delete();
+
+    return redirect()->route('articles.index');
+})->name('articles.delete');
