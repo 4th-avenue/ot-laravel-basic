@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Article;
+use App\Http\Requests\UpdateArticleRequest;
+use App\Http\Requests\CreateArticleRequest;
+use App\Http\Requests\EditArticleRequest;
+use App\Http\Requests\DeleteArticleRequest;
 
 class ArticleController extends Controller
 {
@@ -16,15 +20,9 @@ class ArticleController extends Controller
         return view('articles/create');
     }
 
-    public function store(Request $request) {
+    public function store(CreateArticleRequest $request) {
         // 비어있지 않고, 문자열이어야 하고, 255자를 넘으면 안 된다.
-        $input = $request->validate([
-            'body' => [
-                'required',
-                'string',
-                'max:255'
-            ],
-        ]);
+        $input = $request->validated();
 
         Article::create([
             'body' => $input['body'],
@@ -53,23 +51,12 @@ class ArticleController extends Controller
         return view('articles.show', ['article' => $article]);
     }
 
-    public function edit(Article $article) {
-        $this->authorize('update', $article);
-
+    public function edit(EditArticleRequest $request, Article $article) {
         return view('articles.edit', ['article' => $article]);
     }
 
-    public function update(Request $request, Article $article) {
-        $this->authorize('update', $article);
-
-        // 비어있지 않고, 문자열이어야 하고, 255자를 넘으면 안 된다.
-        $input = $request->validate([
-            'body' => [
-                'required',
-                'string',
-                'max:255'
-            ],
-        ]);
+    public function update(UpdateArticleRequest $request, Article $article) {
+        $input = $request->validated();
 
         $article->body = $input['body'];
         $article->save();
@@ -77,9 +64,7 @@ class ArticleController extends Controller
         return redirect()->route('articles.index');
     }
 
-    public function destroy(Article $article) {
-        $this->authorize('delete', $article);
-
+    public function destroy(DeleteArticleRequest $request, Article $article) {
         $article->delete();
 
         return redirect()->route('articles.index');
