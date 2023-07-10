@@ -16,9 +16,12 @@ class ArticleControllerTest extends TestCase
     /**
      * @test
      */
-    public function 글쓰기_화면을_볼_수_있다(): void
+    public function 로그인_사용자는_글쓰기_화면을_볼_수_있다(): void
     {
-        $this->get(route('articles.create'))
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+        ->get(route('articles.create'))
         ->assertStatus(200)
         ->assertSee('글쓰기');
     }
@@ -26,7 +29,17 @@ class ArticleControllerTest extends TestCase
     /**
      * @test
      */
-    public function 글을_작성할_수_있다(): void
+    public function 비로그인_사용자는_글쓰기_화면을_볼_수_없다(): void
+    {
+        $this->get(route('articles.create'))
+        ->assertStatus(302)
+        ->assertRedirectToRoute('login');
+    }
+
+    /**
+     * @test
+     */
+    public function 로그인_사용자는_글을_작성할_수_있다(): void
     {
         $testData = [
             'body' => 'test article'
@@ -39,6 +52,21 @@ class ArticleControllerTest extends TestCase
         ->assertRedirect(route('articles.index'));
 
         $this->assertDatabaseHas('articles', $testData);
+    }
+
+    /**
+     * @test
+     */
+    public function 비로그인_사용자는_글을_작성할_수_없다(): void
+    {
+        $testData = [
+            'body' => 'test article'
+        ];
+
+        $this->post(route('articles.store'),$testData)
+        ->assertRedirectToRoute('login');
+
+        $this->assertDatabaseMissing('articles', $testData);
     }
 
     /**
@@ -78,11 +106,14 @@ class ArticleControllerTest extends TestCase
     /**
      * @test
      */
-    public function 글수정_화면을_볼_수_있다(): void
+    public function 로그인_사용자는_글수정_화면을_볼_수_있다(): void
     {
-        $article = Article::factory()->create();
+        $user = User::factory()->create();
 
-        $this->get(route('articles.edit', ['article' => $article->id]))
+        $article = Article::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+        ->get(route('articles.edit', ['article' => $article->id]))
         ->assertStatus(200)
         ->assertSee('글 수정');
     }
@@ -90,28 +121,77 @@ class ArticleControllerTest extends TestCase
     /**
      * @test
      */
-    public function 글을_수정할_수_있다(): void
+    public function 비로그인_사용자는_글수정_화면을_볼_수_없다(): void
+    {
+        $article = Article::factory()->create();
+
+        $this->get(route('articles.edit', ['article' => $article->id]))
+        ->assertRedirectToRoute('login');
+    }
+
+    /**
+     * @test
+     */
+    public function 로그인_사용자는_글을_수정할_수_있다(): void
+    {
+        $user = User::factory()->create();
+
+        $payload = ['body' => '수정된 글'];
+
+        $article = Article::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+        ->patch(route('articles.update', ['article' => $article->id]), $payload)
+        ->assertRedirect(route('articles.index'));
+
+        $this->assertDatabaseHas('articles', $payload);
+
+        $this->assertEquals($payload['body'], $article->refresh()->body);
+    }
+
+    /**
+     * @test
+     */
+    public function 비로그인_사용자는_글을_수정할_수_없다(): void
     {
         $payload = ['body' => '수정된 글'];
 
         $article = Article::factory()->create();
 
         $this->patch(route('articles.update', ['article' => $article->id]), $payload)
-        ->assertRedirect(route('articles.index'));
+        ->assertRedirectToRoute('login');
 
-        $this->assertDatabaseHas('articles', $payload);
+        $this->assertDatabaseMissing('articles', $payload);
+
+        $this->assertNotEquals($payload['body'], $article->refresh()->body);
     }
 
     /**
      * @test
      */
-    public function 글을_삭제할_수_있다(): void
+    public function 로그인_사용자는_글을_삭제할_수_있다(): void
+    {
+        $user = User::factory()->create();
+
+        $article = Article::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+        ->delete(route('articles.destroy', ['article' => $article->id]))
+        ->assertRedirect(route('articles.index'));
+
+        $this->assertDatabaseMissing('articles', ['id' => $article->id]);
+    }
+
+    /**
+     * @test
+     */
+    public function 비로그인_사용자는_글을_삭제할_수_없다(): void
     {
         $article = Article::factory()->create();
 
         $this->delete(route('articles.destroy', ['article' => $article->id]))
-        ->assertRedirect(route('articles.index'));
+        ->assertRedirectToRoute('login');
 
-        $this->assertDatabaseMissing('articles', ['id' => $article->id]);
+        $this->assertDatabaseHas('articles', ['id' => $article->id]);
     }
 }
