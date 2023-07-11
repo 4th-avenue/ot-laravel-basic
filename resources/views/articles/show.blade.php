@@ -5,7 +5,10 @@
                 <div class="p-6 text-gray-900">
                     <p>{{$article->body}}</p>
                     <p>{{$article->user->name}}</p>
-                    <p>{{$article->created_at->diffForHumans()}}</p>
+                    <p class="text-xs text-gray-500">
+                        {{$article->created_at->diffForHumans()}}
+                        <span>| 댓글 {{$article->comments_count}}</span>
+                    </p>
 
                     <x-article-button-group :article=$article />
                 </div>
