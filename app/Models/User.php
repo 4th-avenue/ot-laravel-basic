@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Article;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class User extends Authenticatable
 {
@@ -42,4 +45,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function articles(): HasMany
+    {
+        return $this->hasMany(Article::class);
+    }
 }
