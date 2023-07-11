@@ -3,7 +3,9 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    {{$article->body}}
+                    <p>{{$article->body}}</p>
+                    <p>{{$article->user->name}}</p>
+                    <p>{{$article->created_at->diffForHumans()}}</p>
 
                     <x-article-button-group :article=$article />
                 </div>
@@ -19,6 +21,14 @@
                     @enderror
                     <x-primary-button>댓글</x-primary-button>
                 </form>
+                <div class="mt-4">
+                    @foreach($article->comments as $comment)
+                    <div class="mt-4">
+                        <p>{{$comment->body}}</p>
+                        <p class="text-xs text-gray-500">{{$comment->user->name}} {{$comment->created_at->diffForHumans()}}</p>
+                    </div>
+                    @endforeach
+                </div>
             </div>
             <!-- 댓글 끝 -->
         </div>
