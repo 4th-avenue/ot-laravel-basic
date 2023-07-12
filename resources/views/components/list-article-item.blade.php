@@ -1,7 +1,7 @@
 <div class="background-white border rounded mt-3 mb-3 p-3">
     <p><a href="{{route('articles.show', ['article' => $article->id])}}">{{$article->body}}</a></p>
     <p>
-        <a href="{{route('profile', ['user' => $article->user->id])}}">{{$article->user->name}}</a>
+        <a href="{{route('profile', ['user' => $article->user->username])}}">{{$article->user->name}}</a>
     </p>
     <p class="text-xs text-gray-500">
         {{$article->created_at->diffForHumans()}}
