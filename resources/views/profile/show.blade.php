@@ -11,7 +11,24 @@
                 <h1 class="text-2xl">{{$user->name}}</h1>
                 <div>
                     게시물 {{$user->articles->count()}}
+                    구독자 {{$user->followers()->count()}}
                 </div>
+                @if(Auth::id() != $user->id)
+                    <div>
+                        @if(Auth::user()->isFollowing($user))
+                            <form method="POST" action="{{route('unfollow', ['user' => $user->username])}}">
+                                @csrf
+                                @method('delete')
+                                <x-danger-button>구독 해지</x-danger-button>
+                            </form>
+                        @else
+                            <form method="POST" action="{{route('follow', ['user' => $user->username])}}">
+                                @csrf
+                                <x-primary-button>구독하기</x-primary-button>
+                            </form>
+                        @endif
+                    </div>
+                @endif
             </div>
 
             <div>
