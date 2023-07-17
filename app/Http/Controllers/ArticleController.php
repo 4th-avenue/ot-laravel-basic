@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateArticleRequest;
 use App\Http\Requests\CreateArticleRequest;
 use App\Http\Requests\EditArticleRequest;
 use App\Http\Requests\DeleteArticleRequest;
+use Illuminate\Database\Eloquent\Builder;
 
 class ArticleController extends Controller
 {
@@ -36,18 +37,27 @@ class ArticleController extends Controller
     public function index(Request $request) {
         $perPage = $request->input('per_page', 3);
 
+        $q = $request->input('q');
+
         $articles = Article::with('user')
         ->withCount('comments')
         ->withExists(['comments' => function ($query) {
             $query->where('created_at', '>', Carbon::now()->subDay());
         }])
+        ->when($q, function ($query, $q) {
+            $query->where('body', 'like', "%$q%")
+            ->orWhereHas('user', function (Builder $query) use ($q) {
+                $query->where('username', 'like', "%$q%");
+            });
+        })
         ->latest()
         ->paginate($perPage);
         
         return view(
             'articles.index',
             [
-                'articles' => $articles
+                'articles' => $articles,
+                'q' => $q
             ]
         );
     }
